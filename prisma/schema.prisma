@@ -10,6 +10,46 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+enum Variant {
+    STANDARD
+    JACK
+    SPADES
+}
+
+enum TableState {
+    OPEN
+    PLAYING
+    DONE
+}
+
+model GameTable {
+    id      String     @id @default(cuid())
+    players Json       @default("{}") @db.JsonB
+    variant Variant    @default(STANDARD)
+    state   TableState @default(OPEN)
+    Round   Round[]
+}
+
+enum RoundState {
+    BIDDING
+    PLAYING
+    DONE
+}
+
+model Round {
+    id        Int        @id @default(autoincrement())
+    tableId   String
+    table     GameTable  @relation(fields: [tableId], references: [id])
+    round     Int        @default(autoincrement())
+    dealIndex BigInt
+    passOffset Int        @default(0)
+    state     RoundState @default(BIDDING)
+    bids      Json       @default("{}") @db.JsonB
+    plays     Json       @default("[]") @db.JsonB
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+}
+
 model Article {
     id        Int      @id @default(autoincrement())
     title     String
