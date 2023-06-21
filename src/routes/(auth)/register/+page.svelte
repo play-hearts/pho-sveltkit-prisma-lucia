@@ -1,7 +1,7 @@
 <form method="POST">
 	<hgroup>
 		<h2>Register</h2>
-		<h3>To post articles, you'll need an account.</h3>
+		<h3>To play, you'll need an account.</h3>
 	</hgroup>
 
 	<label for="name">Name</label>
