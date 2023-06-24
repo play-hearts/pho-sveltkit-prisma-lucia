@@ -42,7 +42,7 @@ model Round {
     tableId    String
     table      GameTable  @relation(fields: [tableId], references: [id])
     round      Int        @default(autoincrement())
-    dealIndex  BigInt
+    dealHexStr String     @default("deadbeef")
     passOffset Int        @default(0)
     state      RoundState @default(BIDDING)
     bids       Json       @default("{}") @db.JsonB
