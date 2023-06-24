@@ -39,7 +39,6 @@ enum RoundState {
 }
 
 model Round {
-    id         Int        @id @default(autoincrement())
     tableId    String
     table      GameTable  @relation(fields: [tableId], references: [id])
     round      Int        @default(autoincrement())
@@ -51,7 +50,7 @@ model Round {
     createdAt  DateTime   @default(now())
     updatedAt  DateTime   @updatedAt
 
-    @@index([tableId, round])
+    @@unique([tableId, round])
 }
 
 model AuthUser {
