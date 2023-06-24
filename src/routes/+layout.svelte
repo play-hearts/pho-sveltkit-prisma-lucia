@@ -9,7 +9,7 @@
 		<ul>
 			<li>
 				<strong>
-					<a href="/pho"> Play Hearts Online </a>
+					<a href="/"> Play Hearts Online </a>
 				</strong>
 			</li>
 		</ul>

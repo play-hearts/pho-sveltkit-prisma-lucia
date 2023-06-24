@@ -1,7 +1,7 @@
 import { asVariant } from '$lib/variant.js'
 import { fail, redirect } from '@sveltejs/kit'
 import { prisma } from '$lib/server/prisma'
-import { TableState } from '@prisma/client'
+import { TableState, type GameTable } from '@prisma/client'
 import type { Actions, PageServerLoad } from './$types'
 import type { Variant } from '@prisma/client'
 
@@ -27,8 +27,9 @@ export const actions: Actions = {
 		const ownerId = user.userId;
 		const players = { south: ownerId, west, north, east }
 
+		let gameTable: GameTable;
 		try {
-			await prisma.gameTable.create({
+			gameTable = await prisma.gameTable.create({
 				data: {
 					ownerId,
 					variant: v,
@@ -41,8 +42,11 @@ export const actions: Actions = {
 			return fail(500, { message: 'Could not create the game table.' })
 		}
 
-		return {
-			status: 201
-		}
+		throw redirect(302, `/t/${gameTable.id}`)
+
+
+		// return {
+		// 	status: 201
+		// }
 	}
 }

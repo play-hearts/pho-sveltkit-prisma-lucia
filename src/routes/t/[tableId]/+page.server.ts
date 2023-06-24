@@ -42,6 +42,8 @@ export const actions: Actions = {
 			throw error(401, 'Unauthorized')
 		}
 
+		console.log('Starting table:', params.tableId)
+
 		const { variant, west, north, east } = Object.fromEntries(await request.formData()) as Record<
 			string,
 			string
