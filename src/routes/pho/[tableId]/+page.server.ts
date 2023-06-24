@@ -2,6 +2,7 @@ import { asVariant } from '$lib/variant.js'
 import { error, fail } from '@sveltejs/kit'
 import { getPlayers, hasPlayer } from '$lib/players.js'
 import { prisma } from '$lib/server/prisma.js'
+import { TableState } from '@prisma/client'
 import type { Actions, PageServerLoad } from './$types'
 import type { GameTable } from '@prisma/client'
 import type { Players } from '$lib/players.js'
@@ -69,7 +70,8 @@ export const actions: Actions = {
 				},
 				data: {
 					variant: v,
-					players
+					players,
+					state: TableState.PLAYING
 				}
 			})
 		} catch (err) {
