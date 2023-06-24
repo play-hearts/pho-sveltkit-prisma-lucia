@@ -7,7 +7,6 @@
 		<ul>
 			<li>
 				<strong>
-					<a href="/blog"> Blogly </a>
 					<a href="/pho"> Play Hearts Online </a>
 				</strong>
 			</li>
