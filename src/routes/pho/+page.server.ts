@@ -7,7 +7,7 @@ import type { Variant } from '@prisma/client'
 
 export const load: PageServerLoad = async () => {
 	return {
-		gameTables: await prisma.gameTable.findMany()
+		gameTables: await prisma.gameTable.findMany({ where: { state: TableState.OPEN } })
 	}
 }
 
@@ -24,11 +24,13 @@ export const actions: Actions = {
 		>
 
 		const v: Variant = asVariant(variant)
-		const players = { south: user.userId, west, north, east }
+		const ownerId = user.userId;
+		const players = { south: ownerId, west, north, east }
 
 		try {
 			await prisma.gameTable.create({
 				data: {
+					ownerId,
 					variant: v,
 					players,
 					state: TableState.OPEN
@@ -36,7 +38,7 @@ export const actions: Actions = {
 			})
 		} catch (err) {
 			console.error(err)
-			return fail(500, { message: 'Could not create the article.' })
+			return fail(500, { message: 'Could not create the game table.' })
 		}
 
 		return {

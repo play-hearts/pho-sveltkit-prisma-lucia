@@ -1,9 +1,11 @@
 import type { GameTable } from "@prisma/client";
 import { error } from '@sveltejs/kit'
 
-export type Seats = 'south' | 'west' | 'north' | 'east';
+export const ALL_SEATS = ['south', 'west', 'north', 'east'] as const;
+export type Seats = typeof ALL_SEATS;
+export type Seat = Seats[number];
 export type Players = {
-    [seat in Seats]: string;
+    [seat in Seat]: string;
 }
 
 export function getPlayers(table: GameTable): Players {
@@ -11,6 +13,9 @@ export function getPlayers(table: GameTable): Players {
     if (!p) throw error(500, 'game table has no players')
     if (typeof p != 'object') throw error(500, 'game table players is not an object')
     if (Array.isArray(p)) throw error(500, "game table players should not be an array")
+    const players = p as Players;
+    const seats = Object.keys(players);
+    if (seats.length !== 4) throw error(500, "game table players should have 4 seats")
     return p as Players
 }
 

@@ -23,10 +23,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		if (!table) {
 			throw error(404, 'No such game table')
 		}
-		let players: Players = getPlayers(table);
-		if (!hasPlayer(players, userId)) {
-			throw error(403, 'Unauthorized')
-		}
+		// let players: Players = getPlayers(table);
+		// if (!hasPlayer(players, userId)) {
+		// 	throw error(403, 'Unauthorized')
+		// }
 		return table
 	}
 
@@ -42,7 +42,7 @@ export const actions: Actions = {
 			throw error(401, 'Unauthorized')
 		}
 
-		const { variant, south, west, north, east } = Object.fromEntries(await request.formData()) as Record<
+		const { variant, west, north, east } = Object.fromEntries(await request.formData()) as Record<
 			string,
 			string
 		>
@@ -56,13 +56,15 @@ export const actions: Actions = {
 				}
 			})
 
-			// This isn't right. We want to allow other players to add themselves to a table, but only
-			// in seats not yet taken.
-			if (getPlayers(gameTable)['south'] !== user.userId) {
-				throw error(403, 'Forbidden to set up this table.')
+			let playersBefore: Players = getPlayers(gameTable);
+			// console.log('Players before:', playersBefore);
+
+			if (playersBefore.south !== gameTable.ownerId) {
+				throw fail(403, { message: 'Forbidden change south seat to not be table owner.' })
 			}
 
-			const players = { south, west, north, east }
+			let players = { south: gameTable.ownerId, west, north, east };
+			// console.log('Players after:', players);
 
 			await prisma.gameTable.update({
 				where: {
@@ -76,7 +78,7 @@ export const actions: Actions = {
 			})
 		} catch (err) {
 			console.error(err)
-			return fail(500, { message: 'Could not update article' })
+			return fail(500, { message: 'Could not start the game table' })
 		}
 
 		return {
