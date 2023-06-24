@@ -1,8 +1,8 @@
 import { asVariant } from '$lib/variant.js'
-import { error, fail } from '@sveltejs/kit'
+import { error, fail, redirect } from '@sveltejs/kit'
 import { getPlayers, hasPlayer } from '$lib/players.js'
 import { prisma } from '$lib/server/prisma.js'
-import { TableState } from '@prisma/client'
+import { TableState, type Round } from '@prisma/client'
 import type { Actions, PageServerLoad } from './$types'
 import type { GameTable } from '@prisma/client'
 import type { Players } from '$lib/players.js'
@@ -51,6 +51,7 @@ export const actions: Actions = {
 
 		const v: Variant = asVariant(variant)
 
+		let round: Round;
 		try {
 			const gameTable = await prisma.gameTable.findUniqueOrThrow({
 				where: {
@@ -68,7 +69,7 @@ export const actions: Actions = {
 			let players = { south: gameTable.ownerId, west, north, east };
 			// console.log('Players after:', players);
 
-			await prisma.gameTable.update({
+			const startedTable = await prisma.gameTable.update({
 				where: {
 					id: params.tableId
 				},
@@ -78,13 +79,20 @@ export const actions: Actions = {
 					state: TableState.PLAYING
 				}
 			})
+
+			round = await prisma.round.create({
+				data: {
+					tableId: startedTable.id,
+					round: 1,
+					dealHexStr: "deadbeef00"
+				}
+			})
+
 		} catch (err) {
 			console.error(err)
 			return fail(500, { message: 'Could not start the game table' })
 		}
 
-		return {
-			status: 200
-		}
+		throw redirect(302, `/t/${params.tableId}/r/${round.round}`)
 	}
 }
