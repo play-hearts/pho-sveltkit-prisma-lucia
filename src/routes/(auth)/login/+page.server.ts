@@ -11,10 +11,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
 	default: async ({ request, locals }) => {
-		const { username, password } = Object.fromEntries(await request.formData()) as Record<
-			string,
-			string
-		>
+		const { username, password } = Object.fromEntries(await request.formData()) as Record<string, string>
 
 		try {
 			const key = await auth.useKey('username', username, password)

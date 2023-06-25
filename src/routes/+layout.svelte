@@ -1,31 +1,30 @@
 <script lang="ts">
 	import '@picocss/pico'
-	import type { PageData } from './$types'
-	export let data: PageData
+	import type { LayoutServerData } from './$types'
+	export let data: LayoutServerData
 </script>
 
-<div class="container">
-	<nav>
+<div class="container-fluid">
+	<nav class="container-fluid">
 		<ul>
 			<li>
 				<strong>
-					<a href="/"> Blogly </a>
+					<a href="/"> Play Hearts Online </a>
 				</strong>
 			</li>
 		</ul>
 		<ul>
-			<form method="POST">
-				<li><a href="/">Home</a></li>
-				{#if !data.user}
-					<li><a href="/register">Register</a></li>
-					<li><a href="/login" role="button">Login</a></li>
-				{:else}
-					<li>
-						<button formaction="/logout" type="submit" role="button">Logout</button>
-					</li>
-				{/if}
-			</form>
+			{#if !data.user}
+				<li><a href="/register">Register</a></li>
+				<li><a href="/login">Login</a></li>
+			{:else}
+				<li>
+					<a href="/logout">Logout</a>
+				</li>
+			{/if}
 		</ul>
 	</nav>
-	<slot />
+	<main class="container-fluid">
+		<slot />
+	</main>
 </div>

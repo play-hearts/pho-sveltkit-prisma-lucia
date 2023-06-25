@@ -6,47 +6,82 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = "file:./dev.sqlite"
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
-model Article {
-    id      Int    @id @default(autoincrement())
-    title   String
-    content String
-    auth_user    AuthUser   @relation(fields: [userId], references: [id])
-    userId  String
+enum Variant {
+    STANDARD
+    JACK
+    SPADES
+}
+
+enum TableState {
+    OPEN
+    PLAYING
+    DONE
+}
+
+model GameTable {
+    id      String     @id @default(cuid())
+    players Json       @default("{}") @db.JsonB
+    variant Variant    @default(STANDARD)
+    state   TableState @default(OPEN)
+    Round   Round[]
+    owner   AuthUser   @relation(fields: [ownerId], references: [id])
+    ownerId String
+}
+
+enum RoundState {
+    BIDDING
+    PLAYING
+    DONE
+}
+
+model Round {
+    tableId    String
+    table      GameTable  @relation(fields: [tableId], references: [id])
+    round      Int        @default(autoincrement())
+    dealHexStr String     @default("deadbeef")
+    passOffset Int        @default(0)
+    state      RoundState @default(BIDDING)
+    bids       Json       @default("{}") @db.JsonB
+    plays      Json       @default("[]") @db.JsonB
+    createdAt  DateTime   @default(now())
+    updatedAt  DateTime   @updatedAt
+
+    @@unique([tableId, round])
 }
 
 model AuthUser {
-    id       String    @id @unique
-    name     String
-    username String    @unique
-    articles Article[]
-    auth_session  AuthSession[]
-    auth_key      AuthKey[]
+    id           String        @id @unique
+    name         String
+    username     String        @unique
+    auth_session AuthSession[]
+    auth_key     AuthKey[]
+    GameTable    GameTable[]
 
     @@map("auth_user")
 }
 
 model AuthSession {
-    id             String @id @unique
+    id             String   @id @unique
     user_id        String
     active_expires BigInt
     idle_expires   BigInt
-    auth_user           AuthUser   @relation(references: [id], fields: [user_id], onDelete: Cascade)
+    auth_user      AuthUser @relation(references: [id], fields: [user_id], onDelete: Cascade)
 
     @@index([user_id])
     @@map("auth_session")
 }
 
 model AuthKey {
-    id              String  @id @unique
+    id              String   @id @unique
     hashed_password String?
     user_id         String
     primary_key     Boolean
     expires         BigInt?
-    auth_user            AuthUser    @relation(references: [id], fields: [user_id], onDelete: Cascade)
+    auth_user       AuthUser @relation(references: [id], fields: [user_id], onDelete: Cascade)
 
     @@index([user_id])
     @@map("auth_key")

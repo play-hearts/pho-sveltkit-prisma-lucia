@@ -1,77 +1,48 @@
-import type { Actions, PageServerLoad } from './$types'
+import { asVariant } from '$lib/variant.js'
+import { fail, redirect } from '@sveltejs/kit'
 import { prisma } from '$lib/server/prisma'
-import { error, fail, redirect } from '@sveltejs/kit'
+import { TableState, type GameTable } from '@prisma/client'
+import type { Actions, PageServerLoad } from './$types'
+import type { Variant } from '@prisma/client'
 
 export const load: PageServerLoad = async () => {
 	return {
-		articles: await prisma.article.findMany()
+		gameTables: await prisma.gameTable.findMany({ where: { state: TableState.OPEN } })
 	}
 }
 
 export const actions: Actions = {
-	createArticle: async ({ request, locals }) => {
+	createGameTable: async ({ request, locals }) => {
 		const { session, user } = await locals.auth.validateUser()
 		if (!session || !user) {
 			throw redirect(302, '/')
 		}
 
-		const { title, content } = Object.fromEntries(await request.formData()) as Record<
-			string,
-			string
-		>
+		const { variant, west, north, east } = Object.fromEntries(await request.formData()) as Record<string, string>
 
+		const v: Variant = asVariant(variant)
+		const ownerId = user.userId
+		const players = { south: ownerId, west, north, east }
+
+		let gameTable: GameTable
 		try {
-			await prisma.article.create({
+			gameTable = await prisma.gameTable.create({
 				data: {
-					title,
-					content,
-					userId: user.userId
+					ownerId,
+					variant: v,
+					players,
+					state: TableState.OPEN
 				}
 			})
 		} catch (err) {
 			console.error(err)
-			return fail(500, { message: 'Could not create the article.' })
+			return fail(500, { message: 'Could not create the game table.' })
 		}
 
-		return {
-			status: 201
-		}
-	},
-	deleteArticle: async ({ url, locals }) => {
-		const session = await locals.auth.validate()
-		if (!session) {
-			throw redirect(302, '/')
-		}
-		const id = url.searchParams.get('id')
-		if (!id) {
-			return fail(400, { message: 'Invalid request' })
-		}
+		throw redirect(302, `/t/${gameTable.id}`)
 
-		try {
-			const article = await prisma.article.findUniqueOrThrow({
-				where: {
-					id: Number(id)
-				}
-			})
-
-			if (article.userId !== user.userId) {
-				throw error(403, 'Not authorized')
-			}
-
-			await prisma.article.delete({
-				where: {
-					id: Number(id)
-				}
-			})
-		} catch (err) {
-			console.error(err)
-			return fail(500, {
-				message: 'Something went wrong deleting your article'
-			})
-		}
-
-		return {
-			status: 200
-		}
+		// return {
+		// 	status: 201
+		// }
 	}
 }
