@@ -1,5 +1,6 @@
 import { asVariant } from '$lib/variant.js'
 import { error, fail, redirect } from '@sveltejs/kit'
+import { instance } from '$lib/gstate.js'
 import { getPlayers, hasPlayer } from '$lib/players.js'
 import { prisma } from '$lib/server/prisma.js'
 import { TableState, type Round } from '@prisma/client'
@@ -7,6 +8,7 @@ import type { Actions, PageServerLoad } from './$types'
 import type { GameTable } from '@prisma/client'
 import type { Players } from '$lib/players.js'
 import type { Variant } from '@prisma/client'
+import type { GState, GStateInit } from '@playhearts/gstate_wasm'
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { session, user } = await locals.auth.validateUser()
@@ -31,7 +33,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	return {
-		gameTable: getGameTable(user.userId)
+		gameTable: await getGameTable(user.userId)
 	}
 }
 
@@ -80,11 +82,13 @@ export const actions: Actions = {
 				}
 			})
 
+			const init: GStateInit = instance.kRandomVal();
+
 			round = await prisma.round.create({
 				data: {
 					tableId: startedTable.id,
 					round: 1,
-					dealHexStr: "deadbeef00"
+					dealHexStr: init.dealHexStr,
 				}
 			})
 

@@ -1,4 +1,5 @@
 import { error, fail, redirect } from '@sveltejs/kit'
+import { instance } from '$lib/gstate.js'
 import { prisma } from '$lib/server/prisma.js'
 import type { Actions, PageServerLoad } from './$types'
 import type { Prisma, Round } from '@prisma/client'
