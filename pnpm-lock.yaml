@@ -11,9 +11,6 @@ dependencies:
   '@picocss/pico':
     specifier: ^1.5.10
     version: 1.5.10
-  '@playhearts/gstate_wasm':
-    specifier: 0.4.1
-    version: 0.4.1
   '@prisma/client':
     specifier: ^4.15.0
     version: 4.15.0(prisma@4.15.0)
@@ -22,6 +19,9 @@ dependencies:
     version: 1.8.0
 
 devDependencies:
+  '@playhearts/gstate_wasm':
+    specifier: 0.5.0
+    version: 0.5.0
   '@playwright/test':
     specifier: ^1.35.1
     version: 1.35.1
@@ -392,10 +392,10 @@ packages:
     resolution: {integrity: sha512-+LafMsrwPxXQMk6sI///TmSInCwwZmq+K7SikyL3N/4GhhwzyPC+TQLUEqmrLyjluR+uIpFFcqjty30Rtr6GxQ==}
     dev: false
 
-  /@playhearts/gstate_wasm@0.4.1:
-    resolution: {integrity: sha512-1JjKronzut4JIVKzH3fqMMPyiDw+lADOeS9jaypDHw4uRXjjYQYiHhuvUNxV+LRGJZSbE4vndhicCgiUTdGtvA==}
+  /@playhearts/gstate_wasm@0.5.0:
+    resolution: {integrity: sha512-Qo/KXNhhsQRJZsrRnt6vPm/8VhHUv9RPbIFbEt2PEixR335WjWzFxperFgFYelCQXAzxtraSIOqSheW7drlSGw==}
     engines: {node: '>=18.0.0'}
-    dev: false
+    dev: true
 
   /@playwright/test@1.35.1:
     resolution: {integrity: sha512-b5YoFe6J9exsMYg0pQAobNDR85T1nLumUYgUTtKm4d21iX2L7WqKq9dW8NGJ+2vX0etZd+Y7UeuqsxDXm9+5ZA==}
