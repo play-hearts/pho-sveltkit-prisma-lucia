@@ -3,7 +3,12 @@ import { instance } from '$lib/gstate.js'
 import { prisma } from '$lib/server/prisma.js'
 import type { Actions, PageServerLoad } from './$types'
 import type { Prisma, Round } from '@prisma/client'
-import type { } from '@prisma/client'
+import type { GState, GStateInit, CardSet } from '@playhearts/gstate_wasm'
+
+interface LoadResult {
+    tableRound: Round
+    handStr: string
+}
 
 export const load: PageServerLoad = async ({ params, locals }) => {
     const { session, user } = await locals.auth.validateUser()
@@ -11,26 +16,32 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         throw error(401, 'Unauthorized')
     }
 
-    const { tableId, round: r } = params;
-    const round = parseInt(r, 10);
-    const tableId_round: Prisma.RoundTableIdRoundCompoundUniqueInput = { tableId, round };
+    const { tableId, round: r } = params
+    const round = parseInt(r, 10)
+    const tableId_round: Prisma.RoundTableIdRoundCompoundUniqueInput = { tableId, round }
 
-    const getRound = async (userId: string): Promise<Round> => {
+    const getRound = async (userId: string): Promise<LoadResult> => {
         const tableRound: Round | null = await prisma.round.findUnique({
             where: {
-                tableId_round,
+                tableId_round
             }
         })
         if (!tableRound) {
             throw error(404, 'No such round')
         }
 
-        console.log('Round:', tableRound);
+        const { dealHexStr, passOffset }: GStateInit = tableRound
+        const init: GStateInit = { dealHexStr, passOffset }
+        const gstate: GState = new instance.GState(init, instance.GameVariant.STANDARD)
+        const hand: CardSet = gstate.currentPlayersHand()
+        const handStr: string = instance.to_string(hand)
+        console.log(`handStr: ${handStr}`)
 
-        return tableRound
+        hand.delete()
+        gstate.delete()
+
+        return { tableRound, handStr }
     }
 
-    return {
-        tableRound: getRound(user.userId)
-    }
+    return getRound(user.userId)
 }

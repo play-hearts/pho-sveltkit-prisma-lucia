@@ -5,8 +5,9 @@
 	}
 
 	export let data: PageData
-	$: ({ tableRound } = data)
+	$: ({ tableRound, handStr } = data)
 </script>
 
 <h2>Round {tableRound.round}</h2>
 <pre>{JSON.stringify(tableRound, null, 4)}</pre>
+<pre>{handStr}</pre>

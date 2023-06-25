@@ -18,16 +18,13 @@ export const actions: Actions = {
 			throw redirect(302, '/')
 		}
 
-		const { variant, west, north, east } = Object.fromEntries(await request.formData()) as Record<
-			string,
-			string
-		>
+		const { variant, west, north, east } = Object.fromEntries(await request.formData()) as Record<string, string>
 
 		const v: Variant = asVariant(variant)
-		const ownerId = user.userId;
+		const ownerId = user.userId
 		const players = { south: ownerId, west, north, east }
 
-		let gameTable: GameTable;
+		let gameTable: GameTable
 		try {
 			gameTable = await prisma.gameTable.create({
 				data: {
@@ -43,7 +40,6 @@ export const actions: Actions = {
 		}
 
 		throw redirect(302, `/t/${gameTable.id}`)
-
 
 		// return {
 		// 	status: 201

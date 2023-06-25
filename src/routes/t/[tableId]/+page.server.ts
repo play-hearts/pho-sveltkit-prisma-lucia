@@ -46,14 +46,11 @@ export const actions: Actions = {
 
 		console.log('Starting table:', params.tableId)
 
-		const { variant, west, north, east } = Object.fromEntries(await request.formData()) as Record<
-			string,
-			string
-		>
+		const { variant, west, north, east } = Object.fromEntries(await request.formData()) as Record<string, string>
 
 		const v: Variant = asVariant(variant)
 
-		let round: Round;
+		let round: Round
 		try {
 			const gameTable = await prisma.gameTable.findUniqueOrThrow({
 				where: {
@@ -61,14 +58,14 @@ export const actions: Actions = {
 				}
 			})
 
-			let playersBefore: Players = getPlayers(gameTable);
+			let playersBefore: Players = getPlayers(gameTable)
 			// console.log('Players before:', playersBefore);
 
 			if (playersBefore.south !== gameTable.ownerId) {
 				throw fail(403, { message: 'Forbidden change south seat to not be table owner.' })
 			}
 
-			let players = { south: gameTable.ownerId, west, north, east };
+			let players = { south: gameTable.ownerId, west, north, east }
 			// console.log('Players after:', players);
 
 			const startedTable = await prisma.gameTable.update({
@@ -82,16 +79,15 @@ export const actions: Actions = {
 				}
 			})
 
-			const init: GStateInit = instance.kRandomVal();
+			const init: GStateInit = instance.kRandomVal()
 
 			round = await prisma.round.create({
 				data: {
 					tableId: startedTable.id,
 					round: 1,
-					dealHexStr: init.dealHexStr,
+					dealHexStr: init.dealHexStr
 				}
 			})
-
 		} catch (err) {
 			console.error(err)
 			return fail(500, { message: 'Could not start the game table' })
