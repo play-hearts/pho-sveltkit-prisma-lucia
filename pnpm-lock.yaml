@@ -12,8 +12,8 @@ dependencies:
     specifier: ^1.5.10
     version: 1.5.10
   '@playhearts/gstate_wasm':
-    specifier: 0.4.0
-    version: 0.4.0
+    specifier: 0.4.1
+    version: 0.4.1
   '@prisma/client':
     specifier: ^4.15.0
     version: 4.15.0(prisma@4.15.0)
@@ -392,8 +392,8 @@ packages:
     resolution: {integrity: sha512-+LafMsrwPxXQMk6sI///TmSInCwwZmq+K7SikyL3N/4GhhwzyPC+TQLUEqmrLyjluR+uIpFFcqjty30Rtr6GxQ==}
     dev: false
 
-  /@playhearts/gstate_wasm@0.4.0:
-    resolution: {integrity: sha512-KaThApy+0Yprehh+7KMFfB7+HBGcVlkK3kUApsw76KLp5V5ed7sKnQKm9ceYZAbcHXTZ7chBsuP4GZ3BJMDnNQ==}
+  /@playhearts/gstate_wasm@0.4.1:
+    resolution: {integrity: sha512-1JjKronzut4JIVKzH3fqMMPyiDw+lADOeS9jaypDHw4uRXjjYQYiHhuvUNxV+LRGJZSbE4vndhicCgiUTdGtvA==}
     engines: {node: '>=18.0.0'}
     dev: false
 
