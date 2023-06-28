@@ -18,6 +18,7 @@
 		"@playhearts/gstate_wasm": "0.5.0",
 		"@playwright/test": "^1.35.1",
 		"@sveltejs/adapter-auto": "^1.0.3",
+		"@sveltejs/adapter-node": "^1.2.4",
 		"@sveltejs/kit": "^1.20.4",
 		"@types/debug": "^4.1.8",
 		"@types/emscripten": "^1.39.6",
