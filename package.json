@@ -19,6 +19,7 @@
 		"@playwright/test": "^1.35.1",
 		"@sveltejs/adapter-auto": "^1.0.3",
 		"@sveltejs/kit": "^1.20.4",
+		"@types/debug": "^4.1.8",
 		"@types/emscripten": "^1.39.6",
 		"@typescript-eslint/eslint-plugin": "^5.60.0",
 		"@typescript-eslint/parser": "^5.60.0",
