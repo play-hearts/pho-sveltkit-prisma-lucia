@@ -46,6 +46,7 @@
 		"debug": "^4.3.4",
 		"devalue": "^4.3.2",
 		"lucia-auth": "^1.8.0",
+		"node-cache": "^5.1.2",
 		"rxjs": "^7.8.1"
 	}
 }
