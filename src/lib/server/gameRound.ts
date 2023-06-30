@@ -43,7 +43,7 @@ export async function findOrCreateActiveRound(tableId: string): Promise<Round> {
         throw new Error(msg);
     }
 
-    if (gameTable.state == 'DONE') throw new Error('table is done')
+    if (gameTable.state == TableState.DONE) throw new Error('table is done')
 
     const state = RoundState.PLAYING;
 
