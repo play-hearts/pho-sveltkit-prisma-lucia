@@ -4,6 +4,7 @@ import { prisma } from '$lib/server/prisma'
 import { TableState, type GameTable } from '@prisma/client'
 import type { Actions, PageServerLoad } from './$types'
 import type { Variant } from '@prisma/client'
+import { setTableRoundKey } from '$lib/table_round_key'
 
 export const load: PageServerLoad = async () => {
 	return {
@@ -18,9 +19,9 @@ export const actions: Actions = {
 			throw redirect(302, '/')
 		}
 
-		const { variant, west, north, east } = Object.fromEntries(await request.formData()) as Record<string, string>
+		const { variant: v, west, north, east } = Object.fromEntries(await request.formData()) as Record<string, string>
 
-		const v: Variant = asVariant(variant)
+		const variant: Variant = asVariant(v)
 		const ownerId = user.userId
 		const players = { south: ownerId, west, north, east }
 
@@ -29,7 +30,7 @@ export const actions: Actions = {
 			gameTable = await prisma.gameTable.create({
 				data: {
 					ownerId,
-					variant: v,
+					variant,
 					players,
 					state: TableState.OPEN
 				}
@@ -38,11 +39,7 @@ export const actions: Actions = {
 			console.error(err)
 			return fail(500, { message: 'Could not create the game table.' })
 		}
-
-		throw redirect(302, `/t/${gameTable.id}`)
-
-		// return {
-		// 	status: 201
-		// }
+		setTableRoundKey(gameTable.id, 0)
+		throw redirect(302, `/t`)
 	}
 }
