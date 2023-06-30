@@ -1,6 +1,6 @@
 import { asVariant } from '$lib/variant.js'
 import { error, fail, redirect } from '@sveltejs/kit'
-import { instance } from '$lib/gstate.js'
+import { instance } from '$lib/server/gstate.js'
 import { getPlayers, hasPlayer } from '$lib/players.js'
 import { prisma } from '$lib/server/prisma.js'
 import { TableState, type Round } from '@prisma/client'
@@ -10,51 +10,60 @@ import type { Players } from '$lib/players.js'
 import type { Variant } from '@prisma/client'
 import type { GState, GStateInit } from '@playhearts/gstate_wasm'
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+import { setTableRoundKey, table_round_key, type TableRoundKey } from '$lib/table_round_key'
+import { findOrCreateActiveRound } from '$lib/server/gameRound'
+let tableRoundKey: TableRoundKey;
+table_round_key.subscribe((value) => {
+	tableRoundKey = value;
+})
+
+export const load: PageServerLoad = async ({ url, locals }) => {
 	const { session, user } = await locals.auth.validateUser()
 	if (!session || !user) {
 		throw error(401, 'Unauthorized')
 	}
 
-	const getGameTable = async (userId: string): Promise<GameTable> => {
+	let tableId = url.searchParams.get('t') || tableRoundKey.tableId;
+	let round = url.searchParams.get('r') || tableRoundKey.round;
+	setTableRoundKey(tableId, round);
+
+	console.log('Loading: ', url.href)
+
+	const getGameTable = async (): Promise<GameTable> => {
 		const table: GameTable | null = await prisma.gameTable.findUnique({
 			where: {
-				id: params.tableId
+				id: tableId
 			}
 		})
 		if (!table) {
 			throw error(404, 'No such game table')
 		}
-		// let players: Players = getPlayers(table);
-		// if (!hasPlayer(players, userId)) {
-		// 	throw error(403, 'Unauthorized')
-		// }
 		return table
 	}
 
 	return {
-		gameTable: await getGameTable(user.userId)
+		gameTable: await getGameTable()
 	}
 }
 
 export const actions: Actions = {
-	startTable: async ({ request, params, locals }) => {
+	startTable: async ({ request, locals }) => {
 		const { session, user } = await locals.auth.validateUser()
 		if (!session || !user) {
 			throw error(401, 'Unauthorized')
 		}
 
-		console.log('Starting table:', params.tableId)
+		const tableId = tableRoundKey.tableId;
+		console.log('Starting table:', tableId)
 
-		const { variant, west, north, east } = Object.fromEntries(await request.formData()) as Record<string, string>
+		const { variant: v, west, north, east } = Object.fromEntries(await request.formData()) as Record<string, string>
 
-		const v: Variant = asVariant(variant)
+		const variant: Variant = asVariant(v)
 
-		let round: Round
 		try {
 			const gameTable = await prisma.gameTable.findUniqueOrThrow({
 				where: {
-					id: params.tableId
+					id: tableId
 				}
 			})
 
@@ -70,29 +79,24 @@ export const actions: Actions = {
 
 			const startedTable = await prisma.gameTable.update({
 				where: {
-					id: params.tableId
+					id: tableId
 				},
 				data: {
-					variant: v,
+					variant,
 					players,
 					state: TableState.PLAYING
 				}
 			})
 
-			const init: GStateInit = instance.kRandomVal()
-
-			round = await prisma.round.create({
-				data: {
-					tableId: startedTable.id,
-					round: 1,
-					dealHexStr: init.dealHexStr
-				}
-			})
+			await findOrCreateActiveRound(tableId);
 		} catch (err) {
 			console.error(err)
 			return fail(500, { message: 'Could not start the game table' })
 		}
 
-		throw redirect(302, `/t/${params.tableId}/r/${round.round}`)
+		const url = `/t/r`
+		console.log('Redirecting to round at url:', url)
+
+		throw redirect(302, url)
 	}
 }

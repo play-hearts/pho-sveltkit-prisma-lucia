@@ -15,10 +15,12 @@
 		"migrate": "prisma migrate dev"
 	},
 	"devDependencies": {
-		"@playhearts/gstate_wasm": "0.5.0",
+		"@playhearts/gstate_wasm": "0.5.3",
 		"@playwright/test": "^1.35.1",
 		"@sveltejs/adapter-auto": "^1.0.3",
+		"@sveltejs/adapter-node": "^1.2.4",
 		"@sveltejs/kit": "^1.20.4",
+		"@types/debug": "^4.1.8",
 		"@types/emscripten": "^1.39.6",
 		"@typescript-eslint/eslint-plugin": "^5.60.0",
 		"@typescript-eslint/parser": "^5.60.0",
@@ -41,6 +43,10 @@
 		"@lucia-auth/adapter-prisma": "^2.0.0",
 		"@picocss/pico": "^1.5.10",
 		"@prisma/client": "^4.15.0",
-		"lucia-auth": "^1.8.0"
+		"debug": "^4.3.4",
+		"devalue": "^4.3.2",
+		"lucia-auth": "^1.8.0",
+		"node-cache": "^5.1.2",
+		"rxjs": "^7.8.1"
 	}
 }
