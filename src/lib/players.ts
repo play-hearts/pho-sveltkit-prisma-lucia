@@ -1,9 +1,11 @@
 import type { GameTable } from '@prisma/client'
 import { error } from '@sveltejs/kit'
+import { all_seat_names } from '$lib/cards.js'
+import type { SeatName } from '$lib/cards.js'
 
-export const ALL_SEATS = ['south', 'west', 'north', 'east'] as const
+export const ALL_SEATS = all_seat_names
 export type Seats = typeof ALL_SEATS
-export type Seat = Seats[number]
+export type Seat = SeatName
 export type Players = {
 	[seat in Seat]: string
 }
