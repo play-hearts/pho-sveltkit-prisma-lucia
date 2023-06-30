@@ -32,8 +32,8 @@ dependencies:
 
 devDependencies:
   '@playhearts/gstate_wasm':
-    specifier: 0.5.4
-    version: 0.5.4
+    specifier: 0.5.5
+    version: 0.5.5
   '@playwright/test':
     specifier: ^1.35.1
     version: 1.35.1
@@ -410,8 +410,8 @@ packages:
     resolution: {integrity: sha512-+LafMsrwPxXQMk6sI///TmSInCwwZmq+K7SikyL3N/4GhhwzyPC+TQLUEqmrLyjluR+uIpFFcqjty30Rtr6GxQ==}
     dev: false
 
-  /@playhearts/gstate_wasm@0.5.4:
-    resolution: {integrity: sha512-XtmNY8OXz754rd0VwMW/Gx4K2Zr8Jao4ibfLVVRlbJF+nC66SmkAFg8DZZAapv/6fL/8+12AuV4uUWQa5VRmjA==}
+  /@playhearts/gstate_wasm@0.5.5:
+    resolution: {integrity: sha512-/o/LgzS/mTsxmldREtWPnTIFqc0WYT9O/DqNeSgRM/RyjOmj2K9OhYspfypdmK+l4sg0SsRNQL5wWvfVRFcOfQ==}
     engines: {node: '>=18.0.0'}
     dev: true
 
