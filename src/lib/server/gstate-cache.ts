@@ -1,10 +1,9 @@
-import type { Card, GState, GStateInit } from "@playhearts/gstate_wasm";
-import { RoundState, type Round } from "@prisma/client";
+import { RoundState, Variant, type GameTable, type Round } from "@prisma/client";
 import NodeCache from "node-cache";
 import { getPlays, getSpecificRound, type Plays } from "./gameRound";
 import { instance } from "$lib/server/gstate.js";
 import { prisma } from "./prisma";
-import { all_seat_names } from "$lib/cards";
+import type { Card, GState, GStateInit } from "@playhearts/gstate_wasm";
 
 // We can recreate the GState from the RoundState so its not a big deal if
 // we expire a GState before the round is finished.
@@ -22,13 +21,26 @@ gstateCache.on("expired", function (key, value) {
     }
 });
 
+function mapVariant(dbVariant: Variant) {
+    switch (dbVariant) {
+        case Variant.STANDARD:
+            return instance.GameVariant.STANDARD
+        case Variant.JACK:
+            return instance.GameVariant.JACK
+        case Variant.SPADES:
+            return instance.GameVariant.SPADES
+        default:
+            throw new Error(`unknown variant ${dbVariant}`)
+    }
+}
 
-function currentGState(tableRound: Round): GState {
+
+function createCurrentGState(gameTable: GameTable, tableRound: Round): GState {
     const { dealHexStr }: GStateInit = tableRound
     const passOffset = 0;   // TODO Support passing/bidding
 
     const init: GStateInit = { dealHexStr, passOffset }
-    const gstate: GState = new instance.GState(init, instance.GameVariant.STANDARD)     // TODO: support all variants
+    const gstate: GState = new instance.GState(init, mapVariant(gameTable.variant))
     sanityCheckGState(gstate)
     gstate.startGame()
     sanityCheckGState(gstate)
@@ -49,7 +61,7 @@ function mustHaveFunction(obj: any, name: string): void {
     }
 }
 
-export function sanityCheckGState(gstate: GState) {
+export function sanityCheckGState(gstate: GState): void {
     mustHaveFunction(gstate, 'currentPlayer')
     mustHaveFunction(gstate, 'currentTrick')
     mustHaveFunction(gstate, 'priorTrick')
@@ -69,7 +81,10 @@ export async function getGStateRound(tableId: string, round: number): Promise<GS
         if (tableRound.state == RoundState.BIDDING) {
             tableRound = await prisma.round.update({ where: { tableId_round }, data: { state: RoundState.PLAYING } })
         }
-        gstate = currentGState(tableRound);
+        const gameTable: GameTable = await prisma.gameTable.findUniqueOrThrow({ where: { id: tableRound.tableId } });
+
+
+        gstate = createCurrentGState(gameTable, tableRound);
         gstateCache.set<GState>(key, gstate);
     }
     if (!gstate) throw new Error('gstate is null')
