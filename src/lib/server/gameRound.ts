@@ -43,7 +43,7 @@ export async function findOrCreateActiveRound(tableId: string): Promise<Round> {
         throw new Error(msg);
     }
 
-    if (gameTable.state == 'DONE') throw new Error('table is done')
+    if (gameTable.state == TableState.DONE) throw new Error('table is done')
 
     const state = RoundState.PLAYING;
 
@@ -137,7 +137,8 @@ export function createObserver(tableId: string, round: number): Observable<Visib
 
                     if (gstate.done()) {
                         const result = gstate.getPlayerOutcome(0)
-                        console.log('round done. result:', result)
+                        const scores = gstate.getPlayerScores()
+                        console.log('round done. result:', result, 'scores:', scores)
                     } else if (gstate.currentPlayer() != 0) {
                         const legal: CardSet = gstate.legalPlays()
                         const play: Card = instance.aCardAtRandom(legal)

@@ -1,23 +1,22 @@
 import { asVariant } from '$lib/variant.js'
-import { error, fail, redirect } from '@sveltejs/kit'
-import { instance } from '$lib/server/gstate.js'
-import { getPlayers, hasPlayer } from '$lib/players.js'
+import { ActionFailure, error, fail, redirect, type ServerLoadEvent } from '@sveltejs/kit'
+import { getPlayers } from '$lib/players.js'
 import { prisma } from '$lib/server/prisma.js'
-import { TableState, type Round } from '@prisma/client'
-import type { Actions, PageServerLoad } from './$types'
+import { TableState } from '@prisma/client'
+import type { Actions, PageServerLoad, RequestEvent } from './$types'
 import type { GameTable } from '@prisma/client'
 import type { Players } from '$lib/players.js'
 import type { Variant } from '@prisma/client'
-import type { GState, GStateInit } from '@playhearts/gstate_wasm'
 
 import { setTableRoundKey, table_round_key, type TableRoundKey } from '$lib/table_round_key'
 import { findOrCreateActiveRound } from '$lib/server/gameRound'
 let tableRoundKey: TableRoundKey;
-table_round_key.subscribe((value) => {
+table_round_key.subscribe((value: TableRoundKey): void => {
 	tableRoundKey = value;
 })
 
-export const load: PageServerLoad = async ({ url, locals }) => {
+export const load: PageServerLoad = async (event: ServerLoadEvent): Promise<{ gameTable: GameTable }> => {
+	const { url, locals } = event;
 	const { session, user } = await locals.auth.validateUser()
 	if (!session || !user) {
 		throw error(401, 'Unauthorized')
@@ -47,7 +46,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 }
 
 export const actions: Actions = {
-	startTable: async ({ request, locals }) => {
+	startTable: async ({ request, locals }: RequestEvent) => {
 		const { session, user } = await locals.auth.validateUser()
 		if (!session || !user) {
 			throw error(401, 'Unauthorized')
@@ -88,7 +87,13 @@ export const actions: Actions = {
 				}
 			})
 
-			await findOrCreateActiveRound(tableId);
+			// This check is not necessary, but it silences the `startedTable unused` warning
+			if (startedTable.state !== TableState.PLAYING) {
+				throw fail(500, { message: 'Could not start the game table' })
+			}
+
+			const round = await findOrCreateActiveRound(tableId);
+			console.log('Started round:', round)
 		} catch (err) {
 			console.error(err)
 			return fail(500, { message: 'Could not start the game table' })
